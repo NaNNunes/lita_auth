@@ -20,20 +20,45 @@ const connection = () => {
     return conn;
 }
 
+const editMember = (data, callback) => {
+    const sql = `UPDATE MEMBERS
+        SET 
+            member_name = ?,
+            member_surname  = ?,
+            member_enrollment = ?,
+            member_role = ?,
+            member_password = ?
+        WHERE member_enrollment = ?`;
+
+    const values = [
+        data.member_name,
+        data.member_surname,
+        data.member_enrollment,
+        data.member_role,
+        data.member_password, 
+        data.member_enrollment
+    ]
+    const conn = connection();
+    conn.query(sql, values, callback);
+    conn.end();
+}
+
 const memberRegister = async (data, callback) => {
     const sql = `INSERT INTO MEMBERS(
         member_enrollment, 
         member_name,
         member_surname,
-        member_role
+        member_role,
+        member_password
     ) 
-        VALUES(?, ?, ?, ?)`;
+        VALUES(?, ?, ?, ?, ?)`;
 
     const values = [
         data.enrollment,
         data.name,
         data.surname,
-        data.role
+        data.role,
+        data.password
     ]
     const conn = connection();
     conn.query(sql, values, callback);
@@ -48,23 +73,36 @@ const members = (callback) => {
 }
 
 const memberByEnrollment = async (enrollment, callback) => {
-    const sql = `SELECT member_password, member_role FROM MEMBERS WHERE member_enrollment = ?`
-    const value = [enrollment];
+    const sql = `
+    SELECT 
+        member_name, 
+        member_surname, 
+        member_role, 
+        is_first_access
+    FROM MEMBERS 
+        WHERE member_enrollment = ?`
     const conn = connection();
-    conn.query(sql, value, callback);
+    conn.query(sql, [enrollment], callback);
     conn.end();
 }
 
-const createLogin = (enrollment, password, callback) => {
+const login = (enrollment, password, callback) => {
     const sql = 
     `INSERT INTO MEMBER_SESSION(member_session_member_id, member_session_day_id, member_session_login_time)
 	    SELECT m.member_id, d.day_id, current_time() FROM MEMBERS as m, DAYS as d 
         WHERE m.member_enrollment = ? AND m.member_password = ? AND d.day_date = current_date();`
-        
     const values = [enrollment, password];
     const conn = connection();
     conn.query(sql, values, callback);
     conn.end();
+}
+
+const logout = (enrollment, callback) => {
+    const sql = `
+        UPDATE MEMBER_SESSION AS s
+            SET member_session_logout_time = current_time()
+            WHERE s.member_session_member_id = (SELECT member_id FROM MEMBERS WHERE member_enrollment = ?)
+                AND s.member_session_day_id = (SELECT day_id FROM DAYS WHERE day_date = current_date)`
 }
 
 // export const memberSearch = (callback) => {
@@ -74,5 +112,5 @@ const createLogin = (enrollment, password, callback) => {
 // }
 
 module.exports = {
-    members, memberRegister, memberByEnrollment, createLogin
+   editMember, members, memberRegister, memberByEnrollment, login, logout
 }
