@@ -29,7 +29,7 @@ export function handleAccess(){
             return
         }
         const {is_first_access, member_role} = await member(enrollment);
-        populateLocalStorage(enrollment);
+        populateLocalStorage(enrollment, member_role, is_first_access);
         const data = {isLogged: true, member_role, is_first_access, enrollment}
         return data;
     }

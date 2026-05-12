@@ -88,13 +88,8 @@ const EditMemberForm = ({enrollment}) => {
             </div>
         }
 
-        <Button>Enviar</Button>
+        <Button onClick={()=>{console.log('envio de atualizações')}} value='Enviar' type='submit' as='input'/>
 
-
-        {/* {(memberData.is_first_access == '1') 
-            ? <PasswordForm/> 
-            : (memberData.member_enrollment == enrollment) && EditForm
-        } */}
     </div>
   )
 }

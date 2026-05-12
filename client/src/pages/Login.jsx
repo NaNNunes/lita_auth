@@ -24,13 +24,15 @@ const Login = () => {
   }
 
   const handleNavigate = (data = {isLogged : false, member_role : 0, is_first_access : 0, member_enrollment : ""}) => {
-    console.log(data);
-    if(!isLogged) return;
-    if(isFirstAccess == 1){
-      navigate(`/member/${enrollment}`);
+    console.log(data.isLogged)
+    if(! data.isLogged) return;
+    console.log(data.is_first_access == 1);
+    if(data.is_first_access == 1){
+      console.log(data.member_enrollment)
+      navigate(`/member/${data.member_enrollment}`);
       return;
     }
-    if(memberRole != "0"){
+    if(data.member_role != "0"){
       navigate("/home");
       return;
     }
@@ -43,7 +45,8 @@ const Login = () => {
       setIsLogged(isLogged);
       if(!isLogged) return;
       const data = await member(enrollment);
-      handleNavigate(data);
+      if(!data)return
+      handleNavigate({...data, isLogged: true});
       // criar um context
     }
     fetchData();

@@ -52,17 +52,16 @@ export function useMember(){
         return await res.ok;
     }
 
-    const populateLocalStorage = (enrollment, role, memberName, is_first_access) => {
+    const populateLocalStorage = (enrollment, role, is_first_access) => {
         localStorage.setItem("member-enrollment", enrollment);
         localStorage.setItem("member-role", role);
-        localStorage.setItem("member-name", memberName);
         localStorage.setItem("first-access", is_first_access);
     }
 
     const clearLocalStorage = () => {
         localStorage.removeItem("member-enrollment");
         localStorage.removeItem("member-role");
-        localStorage.removeItem("member-name");
+        localStorage.removeItem("first-access");
     }
 
     return {editMember, newMember, member, auth, clearLocalStorage, populateLocalStorage}
