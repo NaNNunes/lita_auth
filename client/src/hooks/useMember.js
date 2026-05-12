@@ -29,45 +29,41 @@ export function useMember(){
     }
 
     const member = async (enrollment) => {
+        if(!enrollment){
+            return false;
+        }
         const res = await fetch(`${url}/members/${enrollment}`);
         if(!res.ok){
             throw new Error(await res.json())
         }
-        const memberData = await res.json();
+        const data = await res.json();
+        const {member_role, member_name, is_first_access} = data.result;
 
-        // localStorage.removeItem("memberEnrollment");
-        // localStorage.removeItem("memberRole");
-        // localStorage.removeItem("memberName");
-
-        // localStorage.setItem("memberEnrollment", enrollment);
-        // localStorage.setItem("memberRole", memberData.result.member_role);
-        // localStorage.setItem("memberName", memberData.result.member_name);
-
-        return memberData.result;
+        return data.result;
     }
 
-    const login = async (data = {enrollment: null, password: null}) => {
+    const auth = async (data = {enrollment: null, password: null}) => {
         const options = {
             "method": "POST",
             "headers": {"Content-Type":"application/json" },
             "body": JSON.stringify(data)
         }
-        const res = await fetch(`${url}/logout`, options);
-
-        if(!res.ok) {
-            throw new Error(await res.json());
-        }
-        return res.ok;
+        const res = await fetch(`${url}/members/auth`, options);
+        return await res.ok;
     }
 
-    const logout = async (data) => {
-        const options = {
-            "method": "POST",
-            "headers": {"Content-Type":"application/json" },
-            "body": JSON.stringify(data)
-        }
-        const res = await fetch(`${url}/logout`)
+    const populateLocalStorage = (enrollment, role, memberName, is_first_access) => {
+        localStorage.setItem("member-enrollment", enrollment);
+        localStorage.setItem("member-role", role);
+        localStorage.setItem("member-name", memberName);
+        localStorage.setItem("first-access", is_first_access);
     }
 
-    return {editMember, newMember, member, login, logout}
+    const clearLocalStorage = () => {
+        localStorage.removeItem("member-enrollment");
+        localStorage.removeItem("member-role");
+        localStorage.removeItem("member-name");
+    }
+
+    return {editMember, newMember, member, auth, clearLocalStorage, populateLocalStorage}
 }

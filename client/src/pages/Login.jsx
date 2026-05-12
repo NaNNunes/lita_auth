@@ -1,66 +1,60 @@
-import Button from 'react-bootstrap/Button';
-import FloatingLabel from 'react-bootstrap/FloatingLabel';
-import Form from 'react-bootstrap/Form'
-
-import { useForm } from 'react-hook-form';
-import { useMember } from '../hooks/useMember';
-import { useState } from 'react';
+import LoginForm from '../components/forms/LoginForm';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { handleAccess } from '../hooks/handleAccess';
+import { useSession } from '../hooks/useSession';
+import { useMember } from '../hooks/useMember';
 
 const Login = () => {
-  const { register, handleSubmit } = useForm();
-  const { login, member, logout } = useMember();
+  const { member } = useMember();
+  const { handleLogin, handleLogout } = handleAccess();
+  const { session } = useSession();
   const [isLogged, setIsLogged] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (data) => {
-    login(data);
-    const memberData = await member(data.enrollment);
-    // const memberRole = localStorage.getItem("memberRole");
+  const login = async (credential) => {
+    const data = await handleLogin(credential);
     setIsLogged(true);
-    if(memberData.is_first_access == 1){
-      navigate("");
-    }
+    handleNavigate(data);
+  }
+  const logout = async (credential) => {
+    const isOut = await handleLogout(credential);
+    setIsLogged(!isOut);
+    location.reload();
+  }
 
-    if(memberData.memberRole != "0"){
+  const handleNavigate = (data = {isLogged : false, member_role : 0, is_first_access : 0, member_enrollment : ""}) => {
+    console.log(data);
+    if(!isLogged) return;
+    if(isFirstAccess == 1){
+      navigate(`/member/${enrollment}`);
+      return;
+    }
+    if(memberRole != "0"){
       navigate("/home");
+      return;
     }
   }
 
-  const onSubmit = async (data) => {
-    if(!isLogged) {
-      handleLogin(data);
+  useEffect(()=>{
+    async function fetchData(){
+      const enrollment = localStorage.getItem("member-enrollment");
+      const isLogged = await session(enrollment);
+      setIsLogged(isLogged);
+      if(!isLogged) return;
+      const data = await member(enrollment);
+      handleNavigate(data);
+      // criar um context
     }
-
-    if(isLogged){
-      logout(data);
-    }
-  }
-  const onErrors = (error) => console.log(error);
+    fetchData();
+  },[]);
+  
   return (
     <div>
-      <Form onSubmit={handleSubmit(onSubmit, onErrors)}>
-        <FloatingLabel label='matrícula'>
-          <Form.Control
-            type='text'
-            placeholder='matrícula'
-            {...register("enrollment")}
-          />
-        </FloatingLabel>
-        <FloatingLabel label='senha'>
-          <Form.Control
-            type='password'
-            placeholder='senha'
-            {...register("password")}
-          />
-        </FloatingLabel>
-        <Button 
-          type='submit' 
-          as="input" 
-          value={(isLogged) ? "Logout" : "Login"} 
-          variant={(isLogged) ? "danger" : "primary"}
-        />
-      </Form>
+      <LoginForm 
+        handleLogin={login} 
+        handleLogout={logout} 
+        isLogged={isLogged}/>
     </div>
   )
 }

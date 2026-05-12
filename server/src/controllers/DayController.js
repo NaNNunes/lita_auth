@@ -18,7 +18,6 @@ const lastDay = (_, res) => {
 }
 
 const newDay = (req, res) => {
-
     dayRegistration(
         req.body.date, 
         (error) => {

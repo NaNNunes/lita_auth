@@ -27,11 +27,9 @@ const days = (callback) => {
 }
 
 const dayRegistration = (date = '', callback) => {
-    // console.log(date);
     const sql = `INSERT INTO DAYS(day_date) value(?)`;
-    const value = [date];
     const conn = connection();
-    conn.query(sql, value, callback);
+    conn.query(sql, [date], callback);
     conn.end();
 }
 

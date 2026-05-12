@@ -2,23 +2,23 @@ import Button from 'react-bootstrap/Button';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form'
 
-import { useMember } from '../hooks/useMember';
+import MemberRoleSelection from './MemberRoleSelect';
+
+import { useMember } from '../../hooks/useMember';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 
 const RegisterMemberForm = () => {
-    const [roleOptions, setRoleOptions] = useState([
-        {id: 0, value: 'Colab'},
-        {id: 1, value: 'Gestor'},
-        {id: 2, value: 'Diretor'}
-    ])
     const [roleSelected, setRoleSelected] = useState('');
     const { register, handleSubmit, setValue } = useForm();
     const { newMember } = useMember();
     const onSubmit = async (data) => {
-        newMember({...data, 'role' : memberRole});
+        console.log(data)
+        newMember({...data, 'member_role' : roleSelected});
     }
     const onErrors = (error) => console.log(error);
+    const onRoleChange = (data) => setRoleSelected(data);
+
   return (
     <div>
         <Form onSubmit={handleSubmit(onSubmit, onErrors)}>
@@ -47,19 +47,10 @@ const RegisterMemberForm = () => {
                 <Form.Control
                     type='password'
                     placeholder='senha'
-                    {...register("password")}
+                    {...register("member_password")}
                 />
             </FloatingLabel>
-            <Form.Select 
-                value={roleSelected}
-                onChange={ (e)=> setRoleSelected(e.target.value.toString())}>
-                <option value="" disabled>Cargo</option>
-                {roleOptions.map((option)=> (
-                    <option key={option.id} value={option.id}>
-                        {option.value}
-                    </option>
-                ))}
-            </Form.Select>
+            <MemberRoleSelection onChange={onRoleChange}/>
             <Button type='submit'>Cadastrar</Button>
         </Form>
     </div>

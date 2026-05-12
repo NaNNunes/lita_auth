@@ -1,40 +1,37 @@
-const dotenv = require('dotenv');
-dotenv.config();
-const URL = process.env.LOCAL_API;
-const PORT = process.env.PORT;
+const mysql = require('mysql2');
 
-let lastDate = null;
+const connection = () => {
+    const conn = mysql.createConnection({
+        host: "localhost",
+        port: "3306",
+        user: "root",
+        password: "",
+        database: "lita_auth_db",
+    });
+    conn.connect((erro) => {
+        if (erro) {
+            console.log(erro);
+        } else {
+            console.log("Conectado com sucesso");
+        }
+    });
 
-// registra data no banco
-const registration = async (date = '') => {
-    const options = {
-        "method" : "POST",
-        "headers" : {"Content-Type" : "application/json"},
-        "body": JSON.stringify({date: date})
-    }
-    const res = await fetch(`${URL}:${PORT}/days/new`, options);
-    if(!res.ok) throw new Error(await res.json());
+    return conn;
 }
 
-const dateMonitor = async () => {   
-    const date = new Date();
-    let currentDateString = date.toISOString().split('T')[0];
-    const res = await fetch(`${URL}:${PORT}/days/last`);
 
-    if(!res.ok && res.status != 404) return
-    if(res.status == 404){
-        registration(currentDateString);
-        lastDate = currentDateString
-        return
-    }
-
-    const data = await res.json();
-    lastDate = date.toISOString(data.day_date).split("T")[0];
-    if(currentDateString != lastDate){
-        registration(currentDateString);
-        return
-    }    
-
+const newDay = (date) => {
+    const sql = `INSERT INTO DAYS(day_date) value(?)`;
+    const conn = connection();
+    conn.query(sql, [date], (error, result)=>{
+        if(error) {
+            console.log(error)
+            return
+        }
+        console.log("Novo dia registrado");
+    });
+    conn.end();
 }
 
-module.exports = dateMonitor;
+
+exports.module = {newDay};
